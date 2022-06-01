@@ -28,7 +28,6 @@ const User = db.define('user', {
     },
     status: {
         type: DataTypes.STRING,
-        allowNull: false,
         defaultValue: 'available',
     },
 });

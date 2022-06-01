@@ -25,12 +25,14 @@ const createUser = catchAsync(async (req, res, next) => {
     const { name, email, password, role } = req.body;
     const salt = await bcrypt.genSalt(12);
     const hashPassword = await bcrypt.hash(password, salt);
+
     const newUser = await User.create({
         name,
         email,
         password: hashPassword,
         role,
     });
+
     newUser.password = undefined;
 
     res.status(201).json({ newUser });

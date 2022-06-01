@@ -34,7 +34,6 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use('/api/v1/users', usersRoter);
 app.use('/api/v1/repairs', repairsRouter);
-
 app.use('*', globalErrorHandler);
 
 module.exports = { app };
