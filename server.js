@@ -14,7 +14,7 @@ db.sync()
     .then(() => console.log('Database synced'))
     .catch(err => console.log(err));
 
-const PORT = process.env.PORT || 3013;
+const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
     console.log(`Express running on port: ${PORT}`);
