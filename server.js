@@ -1,5 +1,6 @@
 const { User } = require('./models/user.model');
 const { Repair } = require('./models/repair.model');
+const { ImgPath } = require('./models/imgPath.model');
 const { app } = require('./app');
 const { db } = require('./utils/database');
 
@@ -9,6 +10,9 @@ db.authenticate()
 
 User.hasMany(Repair);
 Repair.belongsTo(User);
+
+Repair.hasMany(ImgPath);
+ImgPath.belongsTo(Repair);
 
 db.sync()
     .then(() => console.log('Database synced'))

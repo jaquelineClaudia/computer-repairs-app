@@ -2,6 +2,17 @@ const { Repair } = require('../models/repair.model');
 const { User } = require('../models/user.model');
 const { catchAsync } = require('../utils/catchAsync');
 
+const getAllCompletedRepairs = catchAsync(async (req, res, next) => {
+    const repairs = await Repair.findAll({
+        where: { status: 'completed' },
+        include: [{ model: User, attributes: ['id', 'name', 'email'] }],
+    });
+
+    res.status(200).json({
+        repairs,
+    });
+});
+
 const getAllPendingRepairs = catchAsync(async (req, res, next) => {
     const repairs = await Repair.findAll({
         where: { status: 'pending' },
@@ -21,6 +32,9 @@ const getRepairById = catchAsync(async (req, res, next) => {
 
 const createRepair = catchAsync(async (req, res, next) => {
     const { userId, date, computerNumber, comments } = req.body;
+
+    console.log(req.file);
+    console.table(req.body);
 
     const newRepair = await Repair.create({
         userId,
@@ -48,6 +62,7 @@ const deleteRepair = catchAsync(async (req, res, next) => {
 
 module.exports = {
     getAllPendingRepairs,
+    getAllCompletedRepairs,
     getRepairById,
     createRepair,
     updateRepair,

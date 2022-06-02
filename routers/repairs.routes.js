@@ -18,9 +18,17 @@ const {
     deleteRepair,
 } = require('../controllers/repairs.controller');
 
+const { upload } = require('../utils/multer');
+
 const router = express.Router();
 
-router.post('/', createRepairValidations, checkValidations, createRepair);
+router.post(
+    '/',
+    upload.single('imgPath'),
+    createRepairValidations,
+    checkValidations,
+    createRepair
+);
 
 router.use(protectToken, protectEmployee);
 

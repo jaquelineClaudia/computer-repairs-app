@@ -13,12 +13,14 @@ const morgan = require('morgan');
 
 const rateLimit = require('express-rate-limit');
 const limiter = rateLimit({
-    max: 100,
+    max: 10000,
     windowMs: 30 * 60 * 1000,
     message: 'You have exceed the limit request for your IP',
 });
 
 const app = express();
+
+app.use(express.urlencoded({ extended: true }));
 
 app.use(limiter);
 app.use(express.json());
