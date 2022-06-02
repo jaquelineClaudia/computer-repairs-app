@@ -25,10 +25,13 @@
 		"firebase": "^9.8.2",
 		"helmet": "^5.1.0",
 		"jsonwebtoken": "^8.5.1",
+		"mailtrap": "^2.0.2",
 		"morgan": "^1.10.0",
 		"multer": "^1.4.4",
+		"nodemailer": "^6.7.5",
 		"pg": "^8.7.3",
 		"pg-hstore": "^2.3.4",
+		"pug": "^3.0.2",
 		"readme": "^0.7.0",
 		"sequelize": "^6.20.0"
 	},
