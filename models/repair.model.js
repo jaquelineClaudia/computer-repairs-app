@@ -24,7 +24,7 @@ const Repair = db.define('repair', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    imgPath: {
+    imgPathUrl: {
         type: DataTypes.STRING,
     },
     status: {
