@@ -1,28 +1,25 @@
 const { DataTypes } = require('sequelize');
-
 const { db } = require('../utils/database');
 
-const ImgPath = db.define('imgPath', {
+const ProductImg = db.define('productImg', {
     id: {
         primaryKey: true,
         autoIncrement: true,
-        allowNull: true,
+        allowNull: false,
         type: DataTypes.INTEGER,
     },
-    imgPathUrl: {
+    imgUrl: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
     },
-    ImgId: {
+    productId: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-        unique: true,
+        allowNull: false,
     },
-
     status: {
         type: DataTypes.STRING,
-        defaultValue: 'available',
+        defaultValue: 'active',
     },
 });
 
-module.exports = { ImgPath };
+module.exports = { ProductImg };

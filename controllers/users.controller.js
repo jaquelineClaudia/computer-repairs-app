@@ -1,84 +1,140 @@
-const { User } = require('../models/user.model');
-const { catchAsync } = require('../utils/catchAsync');
-const { AppError } = require('../utils/appError');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const { User } = require('../models/user.model');
+const { Order } = require('../models/order.model');
+const { Cart } = require('../models/cart.model');
+const { Product } = require('../models/product.model');
+const { ProductInCart } = require('../models/productInCart.model');
+const { Category } = require('../models/category.model');
+const { catchAsync } = require('../utils/catchAsync');
+const { AppError } = require('../utils/appError');
 
 dotenv.config({ path: './config.env' });
 
 const getAllUsers = catchAsync(async (req, res, next) => {
-    const users = await User.findAll({
-        attributes: { exclude: ['password'] },
-    });
+  const users = await User.findAll({
+    attributes: { exclude: ['password'] },
+  });
 
-    res.status(200).json({ users });
-});
-
-const getUserById = catchAsync(async (req, res, next) => {
-    const { user } = req;
-
-    res.status(200).json({ user });
+  res.status(200).json({
+    users,
+  });
 });
 
 const createUser = catchAsync(async (req, res, next) => {
-    const { name, email, password, role } = req.body;
-    const salt = await bcrypt.genSalt(12);
-    const hashPassword = await bcrypt.hash(password, salt);
+  const { username, email, password, role } = req.body;
 
-    const newUser = await User.create({
-        name,
-        email,
-        password: hashPassword,
-        role,
-    });
+  const salt = await bcrypt.genSalt(12);
+  const hashPassword = await bcrypt.hash(password, salt);
 
-    newUser.password = undefined;
+  const newUser = await User.create({
+    username,
+    email,
+    password: hashPassword,
+    role,
+  });
+  newUser.password = undefined;
 
-    res.status(201).json({ newUser });
+  res.status(201).json({ newUser });
+});
+
+const getUserById = catchAsync(async (req, res, next) => {
+  const { user } = req;
+
+  res.status(200).json({
+    user,
+  });
 });
 
 const updateUser = catchAsync(async (req, res, next) => {
-    const { name, email } = req.body;
-    const { user } = req;
+  const { user } = req;
+  const { name } = req.body;
 
-    await user.update({ name, email });
-    res.status(200).json({ status: 'success' });
+  await user.update({ name });
+
+  res.status(200).json({ status: 'success' });
 });
 
 const deleteUser = catchAsync(async (req, res, next) => {
-    const { user } = req;
+  const { user } = req;
 
-    await user.update({ status: 'disable' });
+  await user.update({ status: 'deleted' });
 
-    res.status(200).json({ status: 'success' });
+  res.status(200).json({
+    status: 'success',
+  });
 });
 
 const login = catchAsync(async (req, res, next) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
+  const user = await User.findOne({
+    where: { email, status: 'active' },
+  });
 
-    const user = await User.findOne({
-        where: { email, status: 'active' },
-    });
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return next(new AppError('Invalid credentials', 400));
+  }
+  const token = await jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-        next(new AppError('Invalid credentials', 400));
-    }
+  user.password = undefined;
 
-    const token = await jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+  res.status(200).json({ token, user });
+});
 
-    user.password = undefined;
+const checkToken = catchAsync(async (req, res, next) => {
+  res.status(200).json({ user: req.sessionUser });
+});
 
-    res.status(200).json({ token, user });
+const getUserProducts = catchAsync(async (req, res, next) => {
+  res.status(200).json({ status: 'success' });
+});
+
+const getUserOrders = catchAsync(async (req, res, next) => {
+  const { sessionUser } = req;
+
+  const orders = await Order.findAll({
+    attributes: ['id', 'totalPrice', 'createdAt'],
+    where: { userId: sessionUser.id },
+    include: [
+      {
+        model: Cart,
+        attributes: ['id', 'status'],
+        include: [
+          {
+            model: ProductInCart,
+            attributes: ['quantity', 'status'],
+            include: [
+              {
+                model: Product,
+                attributes: ['id', 'title', 'description', 'price'],
+                include: [{ model: Category, attributes: ['name'] }],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  res.status(200).json({ status: 'success', orders });
+});
+
+const getUserOrderById = catchAsync(async (req, res, next) => {
+  res.status(200).json({ status: 'success' });
 });
 
 module.exports = {
-    getAllUsers,
-    getUserById,
-    createUser,
-    updateUser,
-    deleteUser,
-    login,
+  getAllUsers,
+  createUser,
+  getUserById,
+  updateUser,
+  deleteUser,
+  login,
+  checkToken,
+  getUserProducts,
+  getUserOrders,
+  getUserOrderById,
 };

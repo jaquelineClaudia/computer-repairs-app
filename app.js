@@ -1,43 +1,39 @@
 const express = require('express');
-const { globalErrorHandler } = require('./controllers/errors.controller');
-const dotenv = require('dotenv');
-
-const { usersRoter } = require('./routes/user.routes');
-const { repairsRouter } = require('./routes/repair.routes');
-
-dotenv.config({ path: './config.env' });
-
-const helmet = require('helmet');
-const compression = require('compression');
-const morgan = require('morgan');
-
+const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const limiter = rateLimit({
-    max: 10000,
-    windowMs: 30 * 60 * 1000,
-    message: 'You have exceed the limit request for your IP',
-});
 
+// Controllers
+const { globalErrorHandler } = require('./controllers/errors.controller');
+
+// Routers
+const { usersRouter } = require('./routes/users.routes');
+const { productsRouter } = require('./routes/products.routes');
+const { cartRouter } = require('./routes/cart.routes');
+
+// Init express app
 const app = express();
 
-app.use(express.urlencoded({ extended: true }));
+// Enable CORS
+app.use(cors());
 
-app.set('view engine', 'pug');
-
-app.use(limiter);
+// Enable incoming JSON data
 app.use(express.json());
 
-app.use(helmet());
-app.use(compression());
+// Limit IP requests
+const limiter = rateLimit({
+    max: 10000,
+    windowMs: 1 * 60 * 60 * 1000, // 1 hr
+    message: 'Too many requests from this IP',
+});
 
-if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
-} else {
-    app.use(morgan('combined'));
-}
+app.use(limiter);
 
-app.use('/api/v1/users', usersRoter);
-app.use('/api/v1/repairs', repairsRouter);
+// Endpoints
+app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/products', productsRouter);
+app.use('/api/v1/cart', cartRouter);
+
+// Global error handler
 app.use('*', globalErrorHandler);
 
 module.exports = { app };

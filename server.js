@@ -1,25 +1,27 @@
-const { User } = require('./models/user.model');
-const { Repair } = require('./models/repair.model');
-const { ImgPath } = require('./models/imgPath.model');
 const { app } = require('./app');
+
+// Models
+const { initModels } = require('./models/initModels');
+
+// Utils
 const { db } = require('./utils/database');
 
+// Authenticate database credentials
 db.authenticate()
     .then(() => console.log('Database authenticated'))
     .catch(err => console.log(err));
 
-User.hasMany(Repair);
-Repair.belongsTo(User);
+// Establish models relations
+initModels();
 
-Repair.hasMany(ImgPath);
-ImgPath.belongsTo(Repair);
-
+// Sync sequelize models
 db.sync()
     .then(() => console.log('Database synced'))
     .catch(err => console.log(err));
 
+// Spin up server
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
-    console.log(`Express running on port: ${PORT}`);
+    console.log(`Express app running on port: ${PORT}`);
 });

@@ -1,30 +1,24 @@
 const { DataTypes } = require('sequelize');
 const { db } = require('../utils/database');
 
-const User = db.define('user', {
+const ProductInCart = db.define('productInCart', {
     id: {
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
         type: DataTypes.INTEGER,
     },
-    username: {
-        type: DataTypes.STRING,
+    cartId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
-    email: {
-        type: DataTypes.STRING,
-        unique: true,
+    productId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
-    password: {
-        type: DataTypes.STRING,
+    quantity: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-    },
-    role: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: 'normal',
     },
     status: {
         type: DataTypes.STRING,
@@ -32,4 +26,4 @@ const User = db.define('user', {
     },
 });
 
-module.exports = { User };
+module.exports = { ProductInCart };

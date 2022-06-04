@@ -1,25 +1,41 @@
 const { body, validationResult } = require('express-validator');
 
-const createRepairValidations = [
-    body('date').notEmpty().withMessage('Enter a valid date'),
-    body('computerNumber')
-        .notEmpty()
-        .withMessage('Enter a valid computer number'),
-    body('comments').notEmpty().withMessage('Provide valid comments'),
-];
+// Utils
+const { AppError } = require('../utils/appError');
 
 const createUserValidations = [
-    body('name').notEmpty().withMessage('Enter a valid name'),
+    body('username').notEmpty().withMessage('Username cannot be empty'),
     body('email')
         .notEmpty()
         .withMessage('Email cannot be empty')
         .isEmail()
-        .withMessage('Must provide a valid email'),
+        .withMessage('Must be a valid email'),
     body('password')
         .notEmpty()
         .withMessage('Password cannot be empty')
-        .isLength({ min: 10 })
-        .withMessage('Password must be at least 10 characters'),
+        .isLength({ min: 8 })
+        .withMessage('Password must be at least 8 characters long'),
+];
+
+const createCategoryValidations = [
+    body('name').notEmpty().withMessage('Name cannot be empty'),
+];
+
+const createProductValidations = [
+    body('title').notEmpty().withMessage('Title cannot be empty'),
+    body('description').notEmpty().withMessage('Description cannot be empty'),
+    body('price')
+        .isFloat({ min: 0 })
+        // .custom(val => {
+        //   return val > 0;
+        // })
+        .withMessage('Price must be greater than 0'),
+    body('quantity')
+        .isInt({ min: 1 })
+        .withMessage('Quantity must be greater than 0'),
+    body('categoryId')
+        .isInt({ min: 1 })
+        .withMessage('Must provide a valid category'),
 ];
 
 const checkValidations = (req, res, next) => {
@@ -27,18 +43,19 @@ const checkValidations = (req, res, next) => {
 
     if (!errors.isEmpty()) {
         const messages = errors.array().map(({ msg }) => msg);
+
+        // [msg, msg, msg] -> 'msg. msg. msg'
         const errorMsg = messages.join('. ');
 
-        return res.status(400).json({
-            status: 'Error',
-            message: errorMsg,
-        });
+        return next(new AppError(errorMsg, 400));
     }
+
     next();
 };
 
 module.exports = {
     createUserValidations,
-    createRepairValidations,
+    createProductValidations,
+    createCategoryValidations,
     checkValidations,
 };
